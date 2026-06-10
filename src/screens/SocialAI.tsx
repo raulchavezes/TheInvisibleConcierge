@@ -1,8 +1,9 @@
 // Screen 1 — Social AI · Intent-driven outreach
+// User: B2B — Marketing & Sales team
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AppHeader, ScreenWrapper } from '../components/AppShell'
-import { Badge, Button, Card, Tag, StatusDot } from '../components/ui'
+import { Badge, Button, Card, Tag, StatusDot, UserTypeBadge } from '../components/ui'
 import { TooltipAnchor } from '../components/OnboardingTooltip'
 import type { TooltipStep } from '../components/OnboardingTooltip'
 
@@ -24,83 +25,92 @@ export const socialAISteps: TooltipStep[] = [
 ]
 
 const signals = [
-  { platform: 'Instagram', handle: '@marina.k', content: 'Saved 14 posts about Punta Cana this week', time: '2h ago', intent: 98 },
-  { platform: 'Google',    handle: 'marina.k@...',  content: '"best all-inclusive punta cana 2025" search', time: '5h ago', intent: 94 },
-  { platform: 'Pinterest', handle: '@marina.k', content: 'Created board "DR vacation ideas"', time: '1d ago', intent: 87 },
+  { platform: 'Instagram', content: 'Saved 14 posts about Punta Cana this week', time: '2h ago', intent: 98 },
+  { platform: 'Google',    content: '"best all-inclusive punta cana 2025" search', time: '5h ago', intent: 94 },
+  { platform: 'Pinterest', content: 'Created board "DR vacation ideas"',          time: '1d ago', intent: 87 },
 ]
 
 const recommendations = [
-  { type: 'Suite',     name: 'Sky Pool Master Suite', detail: 'Infinity pool · Ocean view', price: 'From $480/night', icon: '◈' },
-  { type: 'Activity',  name: 'Private snorkel charter', detail: '4hr · Up to 6 guests', price: '$320', icon: '◉' },
-  { type: 'Dining',    name: 'Alma by Chef Rivera', detail: 'Tasting menu · 8 courses', price: '$195/pp', icon: '◎' },
-  { type: 'Spa',       name: 'Serenity ritual & float', detail: '3hr · Couples available', price: '$240', icon: '✦' },
+  { type: 'Suite',    name: 'Sky Pool Master Suite',    detail: 'Infinity pool · Ocean view', price: 'From $480/night' },
+  { type: 'Activity', name: 'Private snorkel charter',  detail: '4hr · Up to 6 guests',       price: '$320' },
+  { type: 'Dining',   name: 'Alma by Chef Rivera',      detail: 'Tasting menu · 8 courses',   price: '$195/pp' },
+  { type: 'Spa',      name: 'Serenity ritual & float',  detail: '3hr · Couples available',    price: '$240' },
 ]
 
 const tagOptions = ['Couples', 'Beach lover', 'Foodie', 'Adventure', 'Luxury']
+
+const typeColor: Record<string, string> = {
+  Suite: 'text-violet-600 bg-violet-50 border-violet-100',
+  Activity: 'text-teal-600 bg-teal-50 border-teal-100',
+  Dining: 'text-amber-700 bg-amber-50 border-amber-100',
+  Spa: 'text-rose-600 bg-rose-50 border-rose-100',
+}
 
 export function SocialAIScreen() {
   const [activeTag, setActiveTag] = useState('Couples')
   const [sent, setSent] = useState(false)
 
   return (
-    <ScreenWrapper className="px-4 py-3 gap-4 pb-6">
-      <AppHeader title="Social Intelligence" subtitle="Marina K. · Prospect" />
+    <ScreenWrapper className="px-4 py-3 gap-3 pb-6 bg-sea-50">
+      <AppHeader
+        title="Social Intelligence"
+        subtitle="Marina K. · Prospect"
+        actions={<UserTypeBadge type="b2b" />}
+      />
 
-      {/* Intent score */}
+      {/* Intent card */}
       <TooltipAnchor step={socialAISteps[0]}>
-        <Card className="p-0 overflow-hidden">
-          <div className="px-4 pt-4 pb-3 flex items-start justify-between">
-            <div>
-              <Badge variant="gold">High Intent Detected</Badge>
-              <h3 className="font-display text-lg text-white mt-2">Marina is planning a trip</h3>
-              <p className="text-xs text-white/40 mt-0.5">Punta Cana · June–July 2025</p>
+        <Card noPad className="overflow-hidden">
+          <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap mb-2">
+                <Badge variant="navy">High Intent</Badge>
+                <Badge variant="sea">Punta Cana</Badge>
+              </div>
+              <h3 className="font-display text-lg text-navy-900 leading-snug">Marina is planning a trip</h3>
+              <p className="text-xs text-ink-500 mt-0.5">June–July 2025 · 7–10 nights</p>
             </div>
-            <div className="flex flex-col items-center">
+            {/* Score ring */}
+            <div className="flex flex-col items-center flex-shrink-0">
               <div className="relative w-14 h-14">
                 <svg className="w-14 h-14 -rotate-90" viewBox="0 0 56 56">
-                  <circle cx="28" cy="28" r="22" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="4"/>
+                  <circle cx="28" cy="28" r="22" fill="none" stroke="#E8F1F8" strokeWidth="4"/>
                   <motion.circle
                     cx="28" cy="28" r="22" fill="none"
-                    stroke="url(#goldGrad)" strokeWidth="4"
+                    stroke="#1E4168" strokeWidth="4"
                     strokeLinecap="round"
                     strokeDasharray="138"
                     initial={{ strokeDashoffset: 138 }}
-                    animate={{ strokeDashoffset: 138 * (1 - 0.96) }}
-                    transition={{ duration: 1, ease: 'easeOut', delay: 0.3 }}
+                    animate={{ strokeDashoffset: 138 * 0.04 }}
+                    transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
                   />
-                  <defs>
-                    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#8A6B34"/>
-                      <stop offset="100%" stopColor="#E8D5A8"/>
-                    </linearGradient>
-                  </defs>
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-sm font-bold text-gold-400">96</span>
+                  <span className="text-sm font-bold text-navy-800">96</span>
                 </div>
               </div>
-              <span className="text-2xs text-white/30 mt-1">Intent</span>
+              <span className="text-[10px] text-ink-400 mt-0.5 font-medium">Intent</span>
             </div>
           </div>
 
-          {/* Signals */}
-          <div className="border-t border-white/[0.06] divide-y divide-white/[0.04]">
+          {/* Signal rows */}
+          <div className="border-t border-sea-100 divide-y divide-sea-50">
             {signals.map((s, i) => (
               <motion.div
                 key={s.platform}
                 className="flex items-center gap-3 px-4 py-2.5"
-                initial={{ opacity: 0, x: -8 }}
+                initial={{ opacity: 0, x: -6 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.1 * i + 0.4 }}
+                transition={{ delay: 0.1 * i + 0.3 }}
               >
                 <div className="flex items-center gap-1.5 w-20 flex-shrink-0">
                   <StatusDot status="active" />
-                  <span className="text-2xs text-white/40 truncate">{s.platform}</span>
+                  <span className="text-[10px] text-ink-500 font-medium truncate">{s.platform}</span>
                 </div>
-                <p className="text-xs text-white/60 flex-1 leading-snug">{s.content}</p>
-                <div className="flex flex-col items-end gap-0.5">
-                  <span className="text-2xs font-semibold text-gold-500">{s.intent}%</span>
-                  <span className="text-2xs text-white/25">{s.time}</span>
+                <p className="text-xs text-ink-700 flex-1 leading-snug">{s.content}</p>
+                <div className="flex flex-col items-end flex-shrink-0">
+                  <span className="text-xs font-bold text-navy-700">{s.intent}%</span>
+                  <span className="text-[10px] text-ink-300">{s.time}</span>
                 </div>
               </motion.div>
             ))}
@@ -110,8 +120,8 @@ export function SocialAIScreen() {
 
       {/* Profile tags */}
       <div>
-        <p className="text-2xs uppercase tracking-widest text-white/30 mb-2.5 font-medium">Guest profile signals</p>
-        <div className="flex flex-wrap gap-2">
+        <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-2 font-semibold">Profile signals</p>
+        <div className="flex flex-wrap gap-1.5">
           {tagOptions.map(t => (
             <Tag key={t} active={activeTag === t} onClick={() => setActiveTag(t)}>{t}</Tag>
           ))}
@@ -121,25 +131,23 @@ export function SocialAIScreen() {
       {/* Recommendations */}
       <TooltipAnchor step={socialAISteps[1]}>
         <div>
-          <p className="text-2xs uppercase tracking-widest text-white/30 mb-3 font-medium">AI-curated for this profile</p>
-          <div className="grid grid-cols-2 gap-2.5">
+          <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-2.5 font-semibold">AI-curated for this profile</p>
+          <div className="grid grid-cols-2 gap-2">
             {recommendations.map((r, i) => (
               <motion.div
                 key={r.name}
-                className="glass p-3 flex flex-col gap-2"
-                initial={{ opacity: 0, y: 8 }}
+                className="bg-white rounded-xl border border-sea-100 p-3"
+                style={{ boxShadow: '0 1px 6px rgba(12,35,57,0.06)' }}
+                initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08 * i + 0.6 }}
+                transition={{ delay: 0.07 * i + 0.5 }}
               >
-                <div className="flex items-start justify-between">
-                  <span className="text-lg text-gold-500/60">{r.icon}</span>
-                  <Badge variant="slate" size="sm">{r.type}</Badge>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-white leading-snug">{r.name}</p>
-                  <p className="text-2xs text-white/40 mt-0.5">{r.detail}</p>
-                </div>
-                <p className="text-xs font-medium text-gold-400">{r.price}</p>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border inline-block mb-2 ${typeColor[r.type]}`}>
+                  {r.type}
+                </span>
+                <p className="text-xs font-semibold text-navy-900 leading-snug">{r.name}</p>
+                <p className="text-[10px] text-ink-400 mt-0.5">{r.detail}</p>
+                <p className="text-xs font-bold text-navy-700 mt-1.5">{r.price}</p>
               </motion.div>
             ))}
           </div>
@@ -150,22 +158,22 @@ export function SocialAIScreen() {
       <AnimatePresence mode="wait">
         {!sent ? (
           <motion.div key="cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <Button variant="gold" fullWidth size="lg" onClick={() => setSent(true)}>
+            <Button variant="primary" fullWidth size="lg" onClick={() => setSent(true)}>
               Send personalised offer
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M3 8H13M10 5L13 8L10 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M3 7H11M8 4L11 7L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </Button>
           </motion.div>
         ) : (
           <motion.div
             key="sent"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20"
+            className="flex items-center justify-center gap-2 py-3 rounded-xl bg-emerald-50 border border-emerald-200"
           >
             <StatusDot status="active" />
-            <span className="text-sm text-emerald-300 font-medium">Offer sent to marina.k@gmail.com</span>
+            <span className="text-sm text-emerald-700 font-semibold">Offer sent to Marina</span>
           </motion.div>
         )}
       </AnimatePresence>

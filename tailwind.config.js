@@ -4,29 +4,38 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Mare — The Palace Company light palette
         navy: {
-          950: '#03060F',
-          900: '#070D1F',
-          800: '#0D1530',
-          700: '#152044',
-          600: '#1E2D5A',
+          900: '#0C2339',
+          800: '#163450',
+          700: '#1E4168',
+          600: '#2A5580',
+          500: '#3A6E9E',
+        },
+        sea: {
+          50:  '#F4F8FC',
+          100: '#E8F1F8',
+          200: '#D0E4F1',
+          300: '#A8CCDF',
+          400: '#7AAFC9',
+        },
+        sand: {
+          50:  '#FDFAF6',
+          100: '#F9F4EC',
+          200: '#F0E8D8',
         },
         gold: {
-          300: '#E8D5A8',
-          400: '#D4BA82',
-          500: '#C9A96E',
-          600: '#B08D4E',
-          700: '#8A6B34',
+          400: '#C9A55A',
+          500: '#B8903F',
+          600: '#9A7530',
         },
-        cream: {
-          50:  '#FEFCF8',
-          100: '#F9F5EE',
-          200: '#F5F0E6',
-          300: '#EDE5D4',
-          400: '#DDD0B8',
-        },
-        slate: {
-          mare: '#8896AF',
+        // Text
+        ink: {
+          900: '#0C2339',
+          700: '#2C4A62',
+          500: '#4E7290',
+          300: '#8AAFC8',
+          100: '#C5DCE8',
         },
       },
       fontFamily: {
@@ -34,27 +43,24 @@ export default {
         sans:    ['"DM Sans"', 'system-ui', 'sans-serif'],
       },
       backgroundImage: {
-        'gradient-night': 'linear-gradient(160deg, #070D1F 0%, #0D1530 50%, #152044 100%)',
-        'gradient-gold':  'linear-gradient(135deg, #C9A96E 0%, #E8D5A8 50%, #C9A96E 100%)',
+        'gradient-sea':  'linear-gradient(160deg, #E8F1F8 0%, #F4F8FC 60%, #EFF6FA 100%)',
+        'gradient-navy': 'linear-gradient(135deg, #163450 0%, #1E4168 100%)',
       },
       boxShadow: {
-        'glass': '0 4px 24px 0 rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.06)',
-        'gold':  '0 0 24px 0 rgba(201,169,110,0.25)',
-        'glow':  '0 0 40px 0 rgba(201,169,110,0.12)',
-        'card':  '0 2px 16px 0 rgba(0,0,0,0.32)',
+        'card':   '0 2px 12px 0 rgba(12,35,57,0.08), 0 1px 3px 0 rgba(12,35,57,0.05)',
+        'card-md':'0 4px 20px 0 rgba(12,35,57,0.10), 0 1px 4px 0 rgba(12,35,57,0.06)',
+        'card-lg':'0 8px 32px 0 rgba(12,35,57,0.12)',
+        'tooltip':'0 8px 24px 0 rgba(12,35,57,0.16)',
+        'navy':   '0 4px 16px 0 rgba(30,65,104,0.30)',
       },
       animation: {
-        'fade-in':    'fadeIn 0.4s ease-out',
-        'slide-up':   'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
-        'pulse-gold': 'pulseGold 2s ease-in-out infinite',
-        'shimmer':    'shimmer 2.5s linear infinite',
-        'ping-slow':  'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
+        'fade-in':  'fadeIn 0.35s ease-out',
+        'slide-up': 'slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1)',
+        'ping-slow':'ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite',
       },
       keyframes: {
-        fadeIn:    { from: { opacity: '0' }, to: { opacity: '1' } },
-        slideUp:   { from: { opacity: '0', transform: 'translateY(16px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
-        pulseGold: { '0%,100%': { opacity: '1' }, '50%': { opacity: '0.5' } },
-        shimmer:   { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+        fadeIn:  { from: { opacity: '0' }, to: { opacity: '1' } },
+        slideUp: { from: { opacity: '0', transform: 'translateY(12px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
       },
     },
   },

@@ -1,8 +1,9 @@
 // Screen 2 — Predictive Ops · Room Readiness AI
+// User: B2B — Housekeeping & Operations team
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { AppHeader, ScreenWrapper } from '../components/AppShell'
-import { Badge, Card, ProgressBar, StatusDot, Divider } from '../components/ui'
+import { Card, ProgressBar, StatusDot, Divider, UserTypeBadge } from '../components/ui'
 import { TooltipAnchor } from '../components/OnboardingTooltip'
 import type { TooltipStep } from '../components/OnboardingTooltip'
 
@@ -32,16 +33,16 @@ const arrivals: { room: string; guest: string; flight: string; eta: string; stat
   { room: '0320', guest: 'Smith, J.',             flight: 'AA 2020', eta: '17:30', status: 'pending',  priority: null,  hk: '-',         progress: 0   },
 ]
 
-const statusConfig: Record<ArrivalStatus, { label: string; dot: 'active' | 'pending' | 'done'; color: string }> = {
-  ready:    { label: 'Ready',    dot: 'active',  color: 'text-emerald-300' },
-  cleaning: { label: 'In prog.', dot: 'pending', color: 'text-gold-400' },
-  pending:  { label: 'Queued',   dot: 'done',    color: 'text-white/40' },
+const statusConfig: Record<ArrivalStatus, { label: string; dot: 'active' | 'pending' | 'done'; pill: string }> = {
+  ready:    { label: 'Ready',    dot: 'active',  pill: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  cleaning: { label: 'In prog.', dot: 'pending', pill: 'bg-amber-50 text-amber-700 border-amber-200' },
+  pending:  { label: 'Queued',   dot: 'done',    pill: 'bg-sea-100 text-ink-500 border-sea-200' },
 }
 
 const stats = [
-  { label: 'On-time readiness', value: '94%',  trend: '+6%' },
-  { label: 'Avg prep time',     value: '38m',   trend: '-4m' },
-  { label: 'Rooms today',       value: '24',    trend: null },
+  { label: 'On-time readiness', value: '94%',  trend: '+6%',  good: true },
+  { label: 'Avg prep time',     value: '38m',   trend: '-4m',  good: true },
+  { label: 'Rooms today',       value: '24',    trend: null,   good: true },
 ]
 
 export function RoomReadinessScreen() {
@@ -49,118 +50,125 @@ export function RoomReadinessScreen() {
   const selected = arrivals.find(a => a.room === selectedRoom)
 
   return (
-    <ScreenWrapper className="px-4 py-3 gap-4 pb-6">
-      <AppHeader title="Room Readiness" subtitle="Predictive · Live · Jun 10" />
+    <ScreenWrapper className="px-4 py-3 gap-3 pb-6 bg-sea-50">
+      <AppHeader
+        title="Room Readiness"
+        subtitle="Predictive · Live · Jun 10"
+        actions={<UserTypeBadge type="b2b" />}
+      />
 
-      {/* KPI row */}
+      {/* KPI trio */}
       <div className="grid grid-cols-3 gap-2">
         {stats.map(s => (
-          <div key={s.label} className="glass p-3 text-center">
-            <p className="text-lg font-display font-medium text-white">{s.value}</p>
-            {s.trend && <p className="text-2xs text-emerald-400 mt-0.5">{s.trend}</p>}
-            <p className="text-2xs text-white/35 mt-1 leading-tight">{s.label}</p>
+          <div key={s.label}
+            className="bg-white rounded-xl border border-sea-100 p-3 text-center"
+            style={{ boxShadow: '0 1px 6px rgba(12,35,57,0.06)' }}
+          >
+            <p className="font-display text-xl font-medium text-navy-900">{s.value}</p>
+            {s.trend && <p className="text-[10px] font-semibold text-emerald-600 mt-0.5">{s.trend}</p>}
+            <p className="text-[10px] text-ink-400 mt-1 leading-tight">{s.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Arrival timeline */}
+      {/* Arrival list */}
       <TooltipAnchor step={roomReadinessSteps[0]}>
-        <Card className="p-0 overflow-hidden">
-          <div className="px-4 py-3 flex items-center justify-between border-b border-white/[0.06]">
+        <Card noPad className="overflow-hidden">
+          <div className="px-4 py-3 flex items-center justify-between border-b border-sea-100 bg-white">
             <div>
-              <p className="text-xs font-semibold text-white">Today's arrivals</p>
-              <p className="text-2xs text-white/35 mt-0.5">Ranked by predicted arrival</p>
+              <p className="text-xs font-semibold text-navy-900">Today's arrivals</p>
+              <p className="text-[10px] text-ink-400 mt-0.5">Ranked by predicted arrival time</p>
             </div>
-            <Badge variant="teal">Live</Badge>
+            <span className="flex items-center gap-1.5 text-[10px] font-semibold text-teal-700 bg-teal-50 border border-teal-200 px-2 py-0.5 rounded-full">
+              <StatusDot status="active" pulse />
+              Live
+            </span>
           </div>
-
-          <div className="divide-y divide-white/[0.04]">
-            {arrivals.map((a, i) => (
-              <motion.button
-                key={a.room}
-                className="w-full text-left px-4 py-3 hover:bg-white/[0.03] transition-colors"
-                initial={{ opacity: 0, x: -6 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.07 }}
-                onClick={() => setSelectedRoom(a.room === selectedRoom ? null : a.room)}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex flex-col items-center w-10 flex-shrink-0">
-                    <span className="text-sm font-bold text-white">{a.eta.split(':')[0]}</span>
-                    <span className="text-2xs text-white/35">:{a.eta.split(':')[1]}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-semibold text-white truncate">{a.guest}</span>
-                      {a.priority === 'VIP' && <Badge variant="gold">VIP</Badge>}
+          <div className="divide-y divide-sea-50">
+            {arrivals.map((a, i) => {
+              const st = statusConfig[a.status]
+              return (
+                <motion.button
+                  key={a.room}
+                  className="w-full text-left px-4 py-2.5 hover:bg-sea-50 transition-colors"
+                  initial={{ opacity: 0, x: -4 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.06 }}
+                  onClick={() => setSelectedRoom(a.room === selectedRoom ? null : a.room)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 flex-shrink-0 text-center">
+                      <span className="text-sm font-bold text-navy-900">{a.eta.split(':')[0]}</span>
+                      <span className="text-[10px] text-ink-400">:{a.eta.split(':')[1]}</span>
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-2xs text-white/35">#{a.room}</span>
-                      <span className="text-2xs text-white/25">·</span>
-                      <span className="text-2xs text-white/35">{a.flight}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs font-semibold text-navy-900 truncate">{a.guest}</span>
+                        {a.priority === 'VIP' && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 bg-navy-700 text-white rounded-full">VIP</span>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-ink-400 mt-0.5">#{a.room} · {a.flight}</p>
                     </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <div className="flex items-center gap-1.5">
-                      <StatusDot status={statusConfig[a.status].dot} pulse={a.status === 'cleaning'} />
-                      <span className={`text-2xs font-medium ${statusConfig[a.status].color}`}>
-                        {statusConfig[a.status].label}
+                    <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${st.pill}`}>
+                        {st.label}
                       </span>
+                      {a.hk !== '-' && <span className="text-[10px] text-ink-300">{a.hk}</span>}
                     </div>
-                    {a.hk !== '—' && <span className="text-2xs text-white/25">{a.hk}</span>}
                   </div>
-                </div>
-                {/* Progress bar for in-progress rooms */}
-                {a.status === 'cleaning' && (
-                  <div className="mt-2 pl-13">
-                    <ProgressBar value={a.progress} color="gold" />
-                  </div>
-                )}
-              </motion.button>
-            ))}
+                  {a.status === 'cleaning' && (
+                    <div className="mt-2 pl-13">
+                      <ProgressBar value={a.progress} color="navy" />
+                    </div>
+                  )}
+                </motion.button>
+              )
+            })}
           </div>
         </Card>
       </TooltipAnchor>
 
-      {/* Room detail panel */}
+      {/* Room detail */}
       <TooltipAnchor step={roomReadinessSteps[1]}>
         {selected ? (
           <motion.div
             key={selected.room}
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass p-4 space-y-3"
+            className="bg-white rounded-2xl border border-sea-100 p-4 space-y-3"
+            style={{ boxShadow: '0 2px 12px rgba(12,35,57,0.07)' }}
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-white">Room {selected.room} detail</p>
-                <p className="text-2xs text-white/35 mt-0.5">{selected.guest}</p>
+                <p className="text-xs font-semibold text-navy-900">Room {selected.room}</p>
+                <p className="text-[10px] text-ink-400 mt-0.5">{selected.guest}</p>
               </div>
-              <Badge variant={selected.status === 'ready' ? 'teal' : 'gold'}>
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${statusConfig[selected.status].pill}`}>
                 {statusConfig[selected.status].label}
-              </Badge>
+              </span>
             </div>
             <Divider />
             <div className="grid grid-cols-3 gap-3 text-center">
               {[
                 { label: 'Flight', value: selected.flight },
-                { label: 'ETA', value: selected.eta },
-                { label: 'Assigned', value: selected.hk !== '—' ? selected.hk : 'Pending' },
+                { label: 'ETA',    value: selected.eta },
+                { label: 'Staff',  value: selected.hk !== '-' ? selected.hk : 'Pending' },
               ].map(item => (
                 <div key={item.label}>
-                  <p className="text-2xs text-white/30 uppercase tracking-wide">{item.label}</p>
-                  <p className="text-xs font-medium text-white mt-0.5">{item.value}</p>
+                  <p className="text-[10px] text-ink-400 uppercase tracking-wide">{item.label}</p>
+                  <p className="text-xs font-semibold text-navy-900 mt-0.5">{item.value}</p>
                 </div>
               ))}
             </div>
             {selected.status === 'cleaning' && (
-              <ProgressBar value={selected.progress} color="gold" label="Completion" />
+              <ProgressBar value={selected.progress} color="navy" label="Completion" />
             )}
           </motion.div>
         ) : (
-          <div className="glass p-4 flex items-center gap-3 opacity-40">
-            <div className="w-8 h-8 rounded-full bg-navy-700 flex items-center justify-center text-sm">◈</div>
-            <p className="text-xs text-white/50">Tap a room to see details & assign staff</p>
+          <div className="bg-sea-50 border border-sea-200 border-dashed rounded-2xl p-4 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-sea-100 border border-sea-200 flex items-center justify-center text-sm text-navy-500">◈</div>
+            <p className="text-xs text-ink-400">Tap a room to see details & assign staff</p>
           </div>
         )}
       </TooltipAnchor>
