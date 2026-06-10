@@ -8,7 +8,7 @@ export interface TooltipStep {
   id: string
   title: string
   body: string
-  placement?: 'top' | 'bottom' | 'left' | 'right'
+  placement?: 'top' | 'bottom' | 'left' | 'right' | 'side'
   feature: 1 | 2 | 3 | 4
 }
 
@@ -93,7 +93,6 @@ export function TooltipAnchor({ step, children, className }: TooltipAnchorProps)
     }
   }, [active])
 
-  const placement = step.placement ?? 'bottom'
   const meta = FEATURE_META[step.feature]
 
   return (
@@ -118,7 +117,6 @@ export function TooltipAnchor({ step, children, className }: TooltipAnchorProps)
         <TooltipBubble
           step={step}
           rect={rect}
-          placement={placement}
           meta={meta}
           stepIndex={stepIndex}
           totalSteps={totalSteps}
@@ -135,7 +133,6 @@ export function TooltipAnchor({ step, children, className }: TooltipAnchorProps)
 interface BubbleProps {
   step: TooltipStep
   rect: DOMRect
-  placement: string
   meta: typeof FEATURE_META[number]
   stepIndex: number
   totalSteps: number
@@ -143,109 +140,137 @@ interface BubbleProps {
   onDismiss: () => void
 }
 
-function TooltipBubble({ step, rect, placement, meta, stepIndex, totalSteps, onNext, onDismiss }: BubbleProps) {
-  const TIP_W = 272
-  const GAP   = 10
+function TooltipBubble({ step, rect, meta, stepIndex, totalSteps, onNext, onDismiss }: BubbleProps) {
+  const GAP = 16
 
-  // position: fixed uses viewport coordinates — do NOT add scrollY/scrollX
-  let top = 0, left = 0
-  const TIP_H_EST = 200
+  // Measure the actual phone frame from the DOM
+  const phoneEl    = document.querySelector('[data-phone-frame]') as HTMLElement | null
+  const phoneR     = phoneEl ? phoneEl.getBoundingClientRect() : null
+  const phoneLeft  = phoneR ? phoneR.left  : rect.left
+  const phoneRight = phoneR ? phoneR.right : rect.right
 
-  if (placement === 'bottom') {
-    top  = rect.bottom + GAP
-    left = rect.left + rect.width / 2 - TIP_W / 2
-  } else if (placement === 'top') {
-    top  = rect.top - GAP - TIP_H_EST
-    left = rect.left + rect.width / 2 - TIP_W / 2
-  } else if (placement === 'right') {
-    top  = rect.top + rect.height / 2 - TIP_H_EST / 2
-    left = rect.right + GAP
+  const spaceRight = window.innerWidth - phoneRight - GAP - 8
+  const spaceLeft  = phoneLeft - GAP - 8
+  const TIP_W      = Math.min(248, Math.max(spaceRight, spaceLeft, 160))
+  const TIP_H      = 210
+
+  const hasSideRoom = Math.max(spaceRight, spaceLeft) >= 140
+
+  // When no side room: bottom-sheet mode (slide up from bottom)
+  if (!hasSideRoom) {
+    // Render as bottom panel — handled by caller via isBottomSheet flag
+  }
+
+  let left = phoneRight + GAP
+  let arrowSide: 'left' | 'right' = 'left'
+
+  if (spaceRight >= spaceLeft && spaceRight >= 140) {
+    left      = phoneRight + GAP
+    arrowSide = 'left'
   } else {
-    top  = rect.bottom + GAP
-    left = rect.left
+    left      = phoneLeft - GAP - TIP_W
+    arrowSide = 'right'
   }
-
-  // Clamp so tooltip doesn't overflow viewport
   left = Math.max(8, Math.min(left, window.innerWidth - TIP_W - 8))
-  // If tooltip would go below viewport, flip it above the anchor
-  if (top + TIP_H_EST > window.innerHeight - 8) {
-    top = rect.top - GAP - TIP_H_EST
-  }
-  top = Math.max(8, top)
 
-  const yOffset = placement === 'top' ? 6 : -6
+  // Vertically centre on the highlighted element
+  const anchorMidY = rect.top + rect.height / 2
+  let top = anchorMidY - TIP_H / 2
+  top = Math.max(12, Math.min(top, window.innerHeight - TIP_H - 12))
+
+  const arrowY = Math.max(24, Math.min(anchorMidY - top - 6, TIP_H - 36))
+
+  // Bottom-sheet for narrow viewports — slides up from bottom, never overlaps phone
+  if (!hasSideRoom) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          key={step.id}
+          style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999 }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 24 }}
+          transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <TooltipCard step={step} meta={meta} stepIndex={stepIndex} totalSteps={totalSteps} onNext={onNext} onDismiss={onDismiss} isSheet />
+        </motion.div>
+      </AnimatePresence>
+    )
+  }
 
   return (
     <AnimatePresence>
       <motion.div
         key={step.id}
         style={{ position: 'fixed', top, left, width: TIP_W, zIndex: 9999 }}
-        initial={{ opacity: 0, y: yOffset, scale: 0.96 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: yOffset, scale: 0.96 }}
+        initial={{ opacity: 0, x: arrowSide === 'left' ? -8 : 8, scale: 0.97 }}
+        animate={{ opacity: 1, x: 0, scale: 1 }}
+        exit={{ opacity: 0, x: arrowSide === 'left' ? -8 : 8, scale: 0.97 }}
         transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
       >
+        {/* Connecting arrow — points horizontally toward the phone */}
         <div
-          className="bg-white rounded-2xl border border-sea-200 overflow-hidden"
-          style={{ boxShadow: '0 8px 28px rgba(12,35,57,0.18), 0 2px 8px rgba(12,35,57,0.08)' }}
-        >
-          {/* Header */}
-          <div className={clsx('flex items-center gap-2 px-4 pt-3 pb-2.5 border-b border-sea-100', meta.bg)}>
-            <span className={clsx('text-sm', meta.color)}>{meta.icon}</span>
-            <span className={clsx('text-[10px] uppercase tracking-widest font-semibold', meta.color)}>
-              {meta.label}
-            </span>
-            <button
-              onClick={onDismiss}
-              className="ml-auto text-ink-300 hover:text-ink-700 transition-colors p-0.5 rounded"
-            >
-              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </button>
-          </div>
+          className="absolute w-3 h-3 bg-white border border-sea-200"
+          style={{
+            top: arrowY,
+            ...(arrowSide === 'left'
+              ? { left: -7, borderRight: 'none', borderTop: 'none', transform: 'rotate(45deg)' }
+              : { right: -7, borderLeft: 'none', borderBottom: 'none', transform: 'rotate(45deg)' }
+            ),
+          }}
+        />
 
-          {/* Body */}
-          <div className="px-4 py-3">
-            <p className="text-sm font-semibold text-navy-900 leading-snug mb-1.5">{step.title}</p>
-            <p className="text-xs text-ink-500 leading-relaxed">{step.body}</p>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-between px-4 pb-3.5">
-            <div className="flex gap-1">
-              {Array.from({ length: totalSteps }).map((_, i) => (
-                <span
-                  key={i}
-                  className={clsx(
-                    'rounded-full transition-all duration-200',
-                    i === stepIndex ? 'w-4 h-1.5 bg-navy-700' :
-                    i < stepIndex   ? 'w-1.5 h-1.5 bg-navy-300' :
-                                      'w-1.5 h-1.5 bg-sea-200'
-                  )}
-                />
-              ))}
-            </div>
-            <button
-              onClick={onNext}
-              className="flex items-center gap-1.5 text-xs font-semibold text-navy-700 hover:text-navy-900 transition-colors"
-            >
-              {stepIndex < totalSteps - 1 ? 'Next' : 'Done'}
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M3 7H11M8 4L11 7L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Arrow */}
-        {placement === 'bottom' && (
-          <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-sea-200 rotate-45" />
-        )}
-        {placement === 'top' && (
-          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r border-b border-sea-200 rotate-45" />
-        )}
+        <TooltipCard step={step} meta={meta} stepIndex={stepIndex} totalSteps={totalSteps} onNext={onNext} onDismiss={onDismiss} />
       </motion.div>
     </AnimatePresence>
+  )
+}
+
+// ─── Shared card content ──────────────────────────────────────────────────────
+interface CardProps {
+  step: TooltipStep
+  meta: typeof FEATURE_META[number]
+  stepIndex: number
+  totalSteps: number
+  onNext: () => void
+  onDismiss: () => void
+  isSheet?: boolean
+}
+function TooltipCard({ step, meta, stepIndex, totalSteps, onNext, onDismiss, isSheet }: CardProps) {
+  return (
+    <div
+      className={clsx('bg-white border border-sea-200 overflow-hidden', isSheet ? 'rounded-t-2xl' : 'rounded-2xl')}
+      style={{ boxShadow: '0 8px 28px rgba(12,35,57,0.14), 0 2px 8px rgba(12,35,57,0.07)' }}
+    >
+      {isSheet && <div className="flex justify-center pt-2.5 pb-1"><div className="w-8 h-1 bg-sea-200 rounded-full" /></div>}
+      <div className={clsx('flex items-center gap-2 px-4 pt-3 pb-2.5 border-b border-sea-100', meta.bg)}>
+        <span className={clsx('text-sm', meta.color)}>{meta.icon}</span>
+        <span className={clsx('text-[10px] uppercase tracking-widest font-semibold', meta.color)}>{meta.label}</span>
+        <button onClick={onDismiss} className="ml-auto text-ink-300 hover:text-ink-700 transition-colors p-0.5 rounded">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <path d="M2 2L10 10M10 2L2 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div className="px-4 py-3">
+        <p className="text-sm font-semibold text-navy-900 leading-snug mb-1.5">{step.title}</p>
+        <p className="text-xs text-ink-500 leading-relaxed">{step.body}</p>
+      </div>
+      <div className="flex items-center justify-between px-4 pb-4">
+        <div className="flex gap-1">
+          {Array.from({ length: totalSteps }).map((_, i) => (
+            <span key={i} className={clsx('rounded-full transition-all duration-200',
+              i === stepIndex ? 'w-4 h-1.5 bg-navy-700' : i < stepIndex ? 'w-1.5 h-1.5 bg-navy-300' : 'w-1.5 h-1.5 bg-sea-200'
+            )} />
+          ))}
+        </div>
+        <button onClick={onNext} className="flex items-center gap-1.5 text-xs font-semibold text-navy-700 hover:text-navy-900 transition-colors">
+          {stepIndex < totalSteps - 1 ? 'Next' : 'Done'}
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M3 7H11M8 4L11 7L8 10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
   )
 }

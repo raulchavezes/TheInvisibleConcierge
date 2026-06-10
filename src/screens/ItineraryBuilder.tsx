@@ -1,4 +1,4 @@
-// Screen 3 — Generative Content · Bespoke Itinerary Builder
+// Screen 3 — Plan Your Stay (was Itinerary Builder)
 // User: Hybrid — Staff creates, Guest consumes in-app
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,20 +11,19 @@ export const itinerarySteps: TooltipStep[] = [
   {
     id: 'preferences',
     title: 'Tell us your pace',
-    body: 'Duration, tempo, and interests feed our generative model to produce a truly bespoke local guide — not a generic template.',
-    placement: 'bottom',
+    body: 'Pace and interests feed our generative model to produce a truly bespoke guide — every activity already included in the stay.',
+    placement: 'side',
     feature: 3,
   },
   {
     id: 'generated-itinerary',
     title: 'Bespoke day-by-day guide',
     body: 'Every activity is selected and sequenced based on the specific guest profile. Staff can refine or regenerate any day with one tap.',
-    placement: 'top',
+    placement: 'side',
     feature: 3,
   },
 ]
 
-const durations = ['3 nights', '5 nights', '7 nights', '10 nights']
 const paces     = ['Relaxed', 'Balanced', 'Active']
 const interests = ['Beach & Ocean', 'Fine Dining', 'Adventure', 'Culture', 'Wellness', 'Nightlife', 'Family', 'Romance']
 
@@ -32,39 +31,39 @@ const generatedDays = [
   {
     day: 1, theme: 'Arrival & First Impressions',
     items: [
-      { time: '15:00', title: 'Private check-in & welcome cocktail', location: 'Grand Lobby',  type: 'Hotel'    },
-      { time: '17:30', title: 'Sunset catamaran sail',               location: 'Marina Dock',  type: 'Activity' },
-      { time: '20:00', title: 'Alma restaurant — a la carte dinner', location: 'Tower 2, L1', type: 'Dining'   },
+      { time: '15:00', title: 'Private check-in & welcome cocktail', location: 'Grand Lobby',   type: 'Hotel'    },
+      { time: '17:30', title: 'Sunset catamaran sail',               location: 'Marina Dock',   type: 'Activity' },
+      { time: '20:00', title: 'Alma restaurant — a la carte dinner', location: 'Tower 2, L1',  type: 'Dining'   },
     ],
   },
   {
     day: 2, theme: 'Ocean & Adventure',
     items: [
-      { time: '08:00', title: 'Guided snorkel at Catalina Island',  location: 'Boat charter',  type: 'Activity' },
-      { time: '13:00', title: 'Beach club lunch & ceviche bar',     location: 'Playa Grande',  type: 'Dining'   },
-      { time: '16:00', title: 'Serenity Spa — couples ritual',      location: 'Spa Level 3',   type: 'Wellness' },
+      { time: '08:00', title: 'Guided snorkel at Catalina Island',  location: 'Boat charter',   type: 'Activity' },
+      { time: '13:00', title: 'Beach club lunch & ceviche bar',     location: 'Playa Grande',   type: 'Dining'   },
+      { time: '16:00', title: 'Serenity Spa — couples ritual',      location: 'Spa Level 3',    type: 'Wellness' },
     ],
   },
   {
     day: 3, theme: 'Local Culture & Farewell',
     items: [
-      { time: '09:00', title: 'Santo Domingo colonial city tour',   location: 'City transfer', type: 'Culture'  },
-      { time: '14:00', title: 'Chocolate & rum tasting workshop',   location: 'Casa de Campo', type: 'Culture'  },
-      { time: '19:30', title: "Chef's table farewell dinner",       location: 'Private dining',type: 'Dining'   },
+      { time: '09:00', title: 'Santo Domingo colonial city tour',   location: 'City transfer',  type: 'Culture'  },
+      { time: '14:00', title: 'Chocolate & rum tasting workshop',   location: 'Casa de Campo',  type: 'Culture'  },
+      { time: '19:30', title: "Chef's table farewell dinner",       location: 'Private dining', type: 'Dining'   },
     ],
   },
 ]
 
+// Range of blues for type pills
 const typePill: Record<string, string> = {
-  Hotel:    'bg-violet-50 text-violet-700 border-violet-100',
-  Activity: 'bg-teal-50   text-teal-700   border-teal-100',
-  Dining:   'bg-amber-50  text-amber-700  border-amber-100',
-  Wellness: 'bg-rose-50   text-rose-600   border-rose-100',
-  Culture:  'bg-sea-100   text-navy-600   border-sea-200',
+  Hotel:    'bg-navy-800 text-white border-navy-800',
+  Activity: 'bg-navy-600/15 text-navy-800 border-navy-600/20',
+  Dining:   'bg-sea-300/50 text-navy-700 border-sea-300/60',
+  Wellness: 'bg-sea-200 text-navy-600 border-sea-200',
+  Culture:  'bg-sea-100 text-navy-500 border-sea-200',
 }
 
 export function ItineraryBuilderScreen() {
-  const [duration, setDuration] = useState('5 nights')
   const [pace, setPace] = useState('Balanced')
   const [selectedInterests, setSelectedInterests] = useState(['Beach & Ocean', 'Fine Dining', 'Romance'])
   const [generated, setGenerated] = useState(false)
@@ -79,14 +78,14 @@ export function ItineraryBuilderScreen() {
 
   function handleGenerate() {
     setGenerating(true)
-    setTimeout(() => { setGenerating(false); setGenerated(true) }, 1800)
+    setTimeout(() => { setGenerating(false); setGenerated(true) }, 1600)
   }
 
   return (
     <ScreenWrapper className="px-4 py-3 gap-3 pb-6 bg-sea-50">
       <AppHeader
-        title="Itinerary Builder"
-        subtitle="Generative · Personalised"
+        title="Plan Your Stay"
+        subtitle="Personalised · Punta Cana"
         actions={<UserTypeBadge type="hybrid" />}
       />
 
@@ -94,15 +93,8 @@ export function ItineraryBuilderScreen() {
         <>
           <TooltipAnchor step={itinerarySteps[0]}>
             <Card className="space-y-4">
-              <SectionTitle label="Step 1" title="Set your preferences" />
-              <div>
-                <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-2 font-semibold">Duration</p>
-                <div className="flex gap-1.5 flex-wrap">
-                  {durations.map(d => (
-                    <Tag key={d} active={duration === d} onClick={() => setDuration(d)}>{d}</Tag>
-                  ))}
-                </div>
-              </div>
+              <SectionTitle label="Tell us a bit about you" title="How do you like to travel?" />
+
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-2 font-semibold">Pace</p>
                 <div className="flex gap-1.5">
@@ -111,6 +103,7 @@ export function ItineraryBuilderScreen() {
                   ))}
                 </div>
               </div>
+
               <div>
                 <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-2 font-semibold">Interests</p>
                 <div className="flex flex-wrap gap-1.5">
@@ -130,10 +123,10 @@ export function ItineraryBuilderScreen() {
                   transition={{ repeat: Infinity, duration: 0.9, ease: 'linear' }}
                   className="w-4 h-4 border-2 border-white border-t-transparent rounded-full inline-block"
                 />
-                Generating your itinerary…
+                Building your plan…
               </span>
             ) : (
-              <>Generate bespoke itinerary ✦</>
+              <>Build my stay ✦</>
             )}
           </Button>
         </>
@@ -143,14 +136,14 @@ export function ItineraryBuilderScreen() {
             className="flex items-center justify-between"
           >
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-navy-700 text-white uppercase tracking-wide">AI Generated</span>
-              </div>
-              <h3 className="font-display text-lg text-navy-900">{duration} in Punta Cana</h3>
+              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-navy-700 text-white uppercase tracking-wide inline-block mb-1">
+                AI Generated
+              </span>
+              <h3 className="font-display text-lg text-navy-900">Your Punta Cana stay</h3>
               <p className="text-xs text-ink-500 mt-0.5">{pace} pace · {selectedInterests.slice(0, 2).join(', ')}</p>
             </div>
             <button onClick={() => setGenerated(false)}
-              className="text-xs text-navy-600 font-semibold hover:text-navy-800 bg-sea-100 px-3 py-1.5 rounded-full border border-sea-200 transition-colors">
+              className="text-xs text-navy-600 font-semibold hover:text-navy-800 bg-sea-100 px-3 py-1.5 rounded-full border border-sea-200 transition-colors flex-shrink-0">
               Redo
             </button>
           </motion.div>

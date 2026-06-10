@@ -13,7 +13,7 @@ type TabId = 'social' | 'rooms' | 'itinerary' | 'concierge'
 const TABS: { id: TabId; label: string; icon: string; userType: 'b2b' | 'b2c' | 'hybrid' }[] = [
   { id: 'social',     label: 'Discover',  icon: '✦', userType: 'b2b'    },
   { id: 'rooms',      label: 'Rooms',     icon: '◈', userType: 'b2b'    },
-  { id: 'itinerary',  label: 'Journey',   icon: '◉', userType: 'hybrid' },
+  { id: 'itinerary',  label: 'Plan',      icon: '◉', userType: 'hybrid' },
   { id: 'concierge',  label: 'Concierge', icon: '◎', userType: 'b2b'    },
 ]
 
@@ -46,9 +46,9 @@ const DESCRIPTIONS: Record<TabId, {
     intendedUser: 'Housekeeping & Operations',
   },
   itinerary: {
-    tag: 'Generative Content · Itinerary Builder',
-    headline: 'Bespoke local guides, not templates',
-    body: 'Duration, pace, and interests feed a generative model to produce fully personalised day-by-day itineraries for Punta Cana.',
+    tag: 'Generative Content · Plan Your Stay',
+    headline: 'A stay designed around you',
+    body: 'Pace and interests feed a generative model to produce a fully personalised day-by-day guide — every activity already included.',
     userType: 'hybrid',
     intendedUser: 'Concierge creates · Guest consumes',
   },
@@ -75,7 +75,7 @@ export default function App() {
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-navy-500 font-semibold mb-1">
-              Palace Company · Mare Design System
+              Palace Company
             </p>
             <h1 className="font-display text-2xl text-navy-900 font-medium leading-tight">
               The Invisible Concierge

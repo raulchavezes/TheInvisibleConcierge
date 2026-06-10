@@ -15,7 +15,7 @@ export function AppShell({ children, header, footer, className, scrollable = tru
   return (
     <div className="flex items-start justify-center py-8 px-4">
       {/* Phone frame — overflow-visible so tooltips can escape the frame */}
-      <div className="relative w-[390px]" style={{ minHeight: 844 }}>
+      <div data-phone-frame className="relative w-[390px]" style={{ minHeight: 844 }}>
         {/* The visual frame (clipped) */}
         <div className="absolute inset-0 rounded-[44px] overflow-hidden bg-sea-50 border border-sea-200 shadow-[0_24px_64px_rgba(12,35,57,0.16),0_4px_16px_rgba(12,35,57,0.08)] pointer-events-none z-0" />
 
