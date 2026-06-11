@@ -84,9 +84,9 @@ export function ItineraryBuilderScreen() {
   return (
     <ScreenWrapper className="px-4 py-3 gap-3 pb-6 bg-sea-50">
       <AppHeader
-        title="Plan Your Stay"
-        subtitle="Personalised · Punta Cana"
-        actions={<UserTypeBadge type="hybrid" />}
+        title="My Stay"
+        subtitle="Moon Palace · Punta Cana"
+        actions={<UserTypeBadge type="b2c" />}
       />
 
       {!generated ? (
@@ -136,15 +136,12 @@ export function ItineraryBuilderScreen() {
             className="flex items-center justify-between"
           >
             <div>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-navy-700 text-white uppercase tracking-wide inline-block mb-1">
-                AI Generated
-              </span>
               <h3 className="font-display text-lg text-navy-900">Your Punta Cana stay</h3>
               <p className="text-xs text-ink-500 mt-0.5">{pace} pace · {selectedInterests.slice(0, 2).join(', ')}</p>
             </div>
             <button onClick={() => setGenerated(false)}
               className="text-xs text-navy-600 font-semibold hover:text-navy-800 bg-sea-100 px-3 py-1.5 rounded-full border border-sea-200 transition-colors flex-shrink-0">
-              Redo
+              Edit
             </button>
           </motion.div>
 
@@ -207,9 +204,9 @@ export function ItineraryBuilderScreen() {
           </TooltipAnchor>
 
           <Button variant="outline" fullWidth>
-            Share with guest
+            Save to my stay
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M2 7V11a1 1 0 001 1h8a1 1 0 001-1V7M7 1v7M4.5 3.5L7 1L9.5 3.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M2 2h10v10a1 1 0 01-1 1H3a1 1 0 01-1-1V2zM5 2V1h4v1M5 7h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </Button>
         </>

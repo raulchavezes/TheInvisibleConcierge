@@ -10,10 +10,17 @@ import { InvisibleConciergeScreen, invisibleConciergeSteps } from './screens/Inv
 
 type TabId = 'social' | 'rooms' | 'itinerary' | 'concierge'
 
+const FEATURE_TAB: Record<number, TabId> = {
+  1: 'social',
+  2: 'rooms',
+  3: 'itinerary',
+  4: 'concierge',
+}
+
 const TABS: { id: TabId; label: string; icon: string; userType: 'b2b' | 'b2c' | 'hybrid' }[] = [
   { id: 'social',     label: 'Discover',  icon: '✦', userType: 'b2b'    },
   { id: 'rooms',      label: 'Rooms',     icon: '◈', userType: 'b2b'    },
-  { id: 'itinerary',  label: 'Plan',      icon: '◉', userType: 'hybrid' },
+  { id: 'itinerary',  label: 'Plan',      icon: '◉', userType: 'b2c'    },
   { id: 'concierge',  label: 'Concierge', icon: '◎', userType: 'b2b'    },
 ]
 
@@ -48,9 +55,9 @@ const DESCRIPTIONS: Record<TabId, {
   itinerary: {
     tag: 'Generative Content · Plan Your Stay',
     headline: 'A stay designed around you',
-    body: 'Pace and interests feed a generative model to produce a fully personalised day-by-day guide — every activity already included.',
-    userType: 'hybrid',
-    intendedUser: 'Concierge creates · Guest consumes',
+    body: 'Guests set their pace and interests; a generative model builds a fully personalised day-by-day guide — every activity already included in their stay.',
+    userType: 'b2c',
+    intendedUser: 'Guest-facing · Self-service',
   },
   concierge: {
     tag: 'Proactive Service · Behavioural AI',
@@ -63,8 +70,18 @@ const DESCRIPTIONS: Record<TabId, {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>('social')
+  const [tourKey, setTourKey] = useState(0)
   const [tourStarted, setTourStarted] = useState(false)
   const [tourDone, setTourDone] = useState(false)
+
+  const tourRunning = tourStarted && !tourDone
+
+  function startTour() {
+    setTourKey(k => k + 1)
+    setTourStarted(true)
+    setTourDone(false)
+    setActiveTab('social')
+  }
 
   const desc = DESCRIPTIONS[activeTab]
 
@@ -83,23 +100,24 @@ export default function App() {
             <p className="text-xs text-ink-500 mt-1">AI Feature Exploration · Punta Cana</p>
           </div>
 
-          {!tourStarted && !tourDone ? (
+          <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+            {tourDone && (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200">
+                <span className="text-emerald-600 text-[10px]">✓</span>
+                <span className="text-[10px] text-emerald-700 font-semibold">Tour complete</span>
+              </div>
+            )}
             <motion.button
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.4 }}
-              onClick={() => setTourStarted(true)}
-              className="flex-shrink-0 flex flex-col items-center gap-1 px-4 py-2.5 rounded-2xl bg-navy-700 text-white hover:bg-navy-800 transition-colors shadow-navy"
+              onClick={startTour}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-navy-700 text-navy-700 bg-white hover:bg-sea-100 transition-colors text-xs font-semibold whitespace-nowrap"
             >
-              <span className="text-base">✦</span>
-              <span className="text-[10px] font-bold tracking-wide whitespace-nowrap">Start tour</span>
+              <span className="text-sm">✦</span>
+              {tourDone || tourRunning ? 'Restart tour' : 'Start tour'}
             </motion.button>
-          ) : tourDone ? (
-            <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200">
-              <span className="text-emerald-600 text-xs">✓</span>
-              <span className="text-[10px] text-emerald-700 font-semibold">Tour complete</span>
-            </div>
-          ) : null}
+          </div>
         </div>
 
         {/* Tab bar */}
@@ -149,8 +167,10 @@ export default function App() {
       {/* Phone mockup — full width context, overflow visible for tooltips */}
       <div className="max-w-2xl mx-auto">
         <OnboardingProvider
+          key={tourKey}
           steps={tourStarted ? ALL_STEPS : []}
           onComplete={() => setTourDone(true)}
+          onStepChange={(step) => setActiveTab(FEATURE_TAB[step.feature])}
         >
           <AnimatePresence mode="wait">
             <motion.div

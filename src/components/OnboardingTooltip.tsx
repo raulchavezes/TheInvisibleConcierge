@@ -19,11 +19,12 @@ interface OnboardingCtx {
   advance: () => void
   dismiss: () => void
   isActive: (id: string) => boolean
+  currentStep: TooltipStep | null
 }
 
 const Ctx = createContext<OnboardingCtx>({
   activeStep: null, stepIndex: 0, totalSteps: 0,
-  advance: () => {}, dismiss: () => {}, isActive: () => false,
+  advance: () => {}, dismiss: () => {}, isActive: () => false, currentStep: null,
 })
 
 export function useOnboarding() { return useContext(Ctx) }
@@ -31,7 +32,7 @@ export function useOnboarding() { return useContext(Ctx) }
 const FEATURE_META: Record<number, { label: string; icon: string; color: string; bg: string }> = {
   1: { label: 'Social AI',          icon: '✦', color: 'text-violet-700', bg: 'bg-violet-50 border-violet-200' },
   2: { label: 'Room Readiness',     icon: '◈', color: 'text-teal-700',   bg: 'bg-teal-50 border-teal-200'     },
-  3: { label: 'Itinerary Builder',  icon: '◉', color: 'text-amber-700',  bg: 'bg-amber-50 border-amber-200'   },
+  3: { label: 'Plan Your Stay',     icon: '◉', color: 'text-amber-700',  bg: 'bg-amber-50 border-amber-200'   },
   4: { label: 'Invisible Concierge',icon: '◎', color: 'text-navy-700',   bg: 'bg-sea-100 border-sea-200'       },
 }
 
@@ -39,17 +40,25 @@ interface OnboardingProviderProps {
   children: ReactNode
   steps: TooltipStep[]
   onComplete?: () => void
+  onStepChange?: (step: TooltipStep) => void
 }
 
-export function OnboardingProvider({ children, steps, onComplete }: OnboardingProviderProps) {
+export function OnboardingProvider({ children, steps, onComplete, onStepChange }: OnboardingProviderProps) {
   const [stepIndex, setStepIndex] = useState(0)
   const [done, setDone] = useState(false)
 
   const activeStep = done ? null : (steps[stepIndex]?.id ?? null)
+  const currentStep = done ? null : (steps[stepIndex] ?? null)
 
   function advance() {
-    if (stepIndex < steps.length - 1) setStepIndex(i => i + 1)
-    else { setDone(true); onComplete?.() }
+    if (stepIndex < steps.length - 1) {
+      const next = stepIndex + 1
+      setStepIndex(next)
+      onStepChange?.(steps[next])
+    } else {
+      setDone(true)
+      onComplete?.()
+    }
   }
 
   return (
@@ -58,6 +67,7 @@ export function OnboardingProvider({ children, steps, onComplete }: OnboardingPr
       advance,
       dismiss: () => setDone(true),
       isActive: (id) => activeStep === id,
+      currentStep,
     }}>
       {children}
     </Ctx.Provider>

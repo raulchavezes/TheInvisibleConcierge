@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AppHeader, ScreenWrapper } from '../components/AppShell'
-import { Button, Card, Tag, StatusDot, UserTypeBadge } from '../components/ui'
+import { Button, Card, StatusDot, UserTypeBadge } from '../components/ui'
 import { TooltipAnchor } from '../components/OnboardingTooltip'
 import type { TooltipStep } from '../components/OnboardingTooltip'
 
@@ -37,7 +37,14 @@ const recommendations = [
   { type: 'Spa',      name: 'Serenity ritual & float',  detail: '3hr · Couples available',      note: 'Included'          },
 ]
 
-const tagOptions = ['Couples', 'Beach lover', 'Foodie', 'Adventure', 'Luxury']
+// AI-inferred profile tags — read-only, derived from social signals
+const profileTags = [
+  { label: 'Couples',      confidence: 'high'   },
+  { label: 'Beach lover',  confidence: 'high'   },
+  { label: 'Foodie',       confidence: 'medium' },
+  { label: 'Adventure',    confidence: 'medium' },
+  { label: 'Luxury',       confidence: 'high'   },
+]
 
 // Range of blues — Suite deepest, Spa lightest
 const typeStyle: Record<string, { chip: string; note: string }> = {
@@ -48,14 +55,13 @@ const typeStyle: Record<string, { chip: string; note: string }> = {
 }
 
 export function SocialAIScreen() {
-  const [activeTag, setActiveTag] = useState('Couples')
   const [sent, setSent] = useState(false)
 
   return (
     <ScreenWrapper className="px-4 py-3 gap-3 pb-6 bg-sea-50">
       <AppHeader
         title="Social Intelligence"
-        subtitle="Marina K. · Prospect"
+        subtitle="Marina K. · Last stay Moon Palace, Dec 2024"
         actions={<UserTypeBadge type="b2b" />}
       />
 
@@ -119,12 +125,24 @@ export function SocialAIScreen() {
         </Card>
       </TooltipAnchor>
 
-      {/* Profile tags */}
+      {/* AI-inferred profile — read-only */}
       <div>
-        <p className="text-[10px] uppercase tracking-widest text-ink-400 mb-2 font-semibold">Profile signals</p>
+        <div className="flex items-center gap-1.5 mb-2">
+          <p className="text-[10px] uppercase tracking-widest text-ink-400 font-semibold">AI profile</p>
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-violet-50 text-violet-600 border border-violet-200 font-semibold tracking-wide">Social signals</span>
+        </div>
         <div className="flex flex-wrap gap-1.5">
-          {tagOptions.map(t => (
-            <Tag key={t} active={activeTag === t} onClick={() => setActiveTag(t)}>{t}</Tag>
+          {profileTags.map(t => (
+            <span
+              key={t.label}
+              className={`text-[10px] font-semibold px-2.5 py-1 rounded-full border select-none ${
+                t.confidence === 'high'
+                  ? 'bg-navy-700/10 text-navy-800 border-navy-700/20'
+                  : 'bg-sea-100 text-navy-600 border-sea-200'
+              }`}
+            >
+              {t.label}
+            </span>
           ))}
         </div>
       </div>
@@ -162,10 +180,38 @@ export function SocialAIScreen() {
         </div>
       </TooltipAnchor>
 
-      {/* CTA */}
+      {/* Offer price summary + CTA */}
       <AnimatePresence mode="wait">
         {!sent ? (
-          <motion.div key="cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div key="cta" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-2">
+            <div className="bg-white rounded-2xl border border-sea-100 px-4 py-3" style={{ boxShadow: '0 1px 6px rgba(12,35,57,0.06)' }}>
+              <div className="flex items-start justify-between gap-2 mb-2.5">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest text-ink-400 font-semibold mb-0.5">Personalised offer</p>
+                  <p className="text-xs text-ink-500">7 nights · Sky Pool Master Suite</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-lg font-bold text-navy-900 leading-none">$5,880</p>
+                  <p className="text-[10px] text-ink-400 mt-0.5">$840 / night</p>
+                </div>
+              </div>
+              <div className="border-t border-sea-50 pt-2.5 space-y-1.5">
+                {[
+                  { label: 'Sky Pool Master Suite (7n)', amount: '$5,880' },
+                  { label: 'All activities & dining', amount: 'Included' },
+                  { label: 'Returning guest discount (10%)', amount: '− $588' },
+                ].map(row => (
+                  <div key={row.label} className="flex items-center justify-between">
+                    <span className="text-[10px] text-ink-500">{row.label}</span>
+                    <span className={`text-[10px] font-semibold ${row.amount.startsWith('−') ? 'text-teal-600' : row.amount === 'Included' ? 'text-teal-600' : 'text-navy-800'}`}>{row.amount}</span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between border-t border-sea-100 pt-1.5 mt-1">
+                  <span className="text-xs font-semibold text-navy-900">Total</span>
+                  <span className="text-sm font-bold text-navy-900">$5,292</span>
+                </div>
+              </div>
+            </div>
             <Button variant="primary" fullWidth size="lg" onClick={() => setSent(true)}>
               Send personalised offer
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
