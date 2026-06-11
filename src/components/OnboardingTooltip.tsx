@@ -1,5 +1,5 @@
 // Onboarding tooltip system — light Mare palette, renders OUTSIDE the phone frame
-import { type ReactNode, createContext, useContext, useState, useRef, useEffect } from 'react'
+import { type ReactNode, type MutableRefObject, createContext, useContext, useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import clsx from 'clsx'
@@ -39,13 +39,22 @@ const FEATURE_META: Record<number, { label: string; icon: string; color: string;
 interface OnboardingProviderProps {
   children: ReactNode
   steps: TooltipStep[]
+  jumpRef?: MutableRefObject<((index: number) => void) | null>
   onComplete?: () => void
   onStepChange?: (step: TooltipStep) => void
 }
 
-export function OnboardingProvider({ children, steps, onComplete, onStepChange }: OnboardingProviderProps) {
+export function OnboardingProvider({ children, steps, jumpRef, onComplete, onStepChange }: OnboardingProviderProps) {
   const [stepIndex, setStepIndex] = useState(0)
   const [done, setDone] = useState(false)
+
+  // Expose jump function to parent via ref so manual tab navigation can sync the tour
+  if (jumpRef) {
+    jumpRef.current = (index: number) => {
+      setDone(false)
+      setStepIndex(index)
+    }
+  }
 
   const activeStep = done ? null : (steps[stepIndex]?.id ?? null)
   const currentStep = done ? null : (steps[stepIndex] ?? null)

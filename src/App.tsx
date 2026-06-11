@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { AppShell, BottomNav } from './components/AppShell'
 import { OnboardingProvider } from './components/OnboardingTooltip'
@@ -15,6 +15,10 @@ const FEATURE_TAB: Record<number, TabId> = {
   2: 'rooms',
   3: 'itinerary',
   4: 'concierge',
+}
+
+const TAB_FEATURE: Record<TabId, number> = {
+  social: 1, rooms: 2, itinerary: 3, concierge: 4,
 }
 
 const TABS: { id: TabId; label: string; icon: string; userType: 'b2b' | 'b2c' | 'hybrid' }[] = [
@@ -73,6 +77,7 @@ export default function App() {
   const [tourKey, setTourKey] = useState(0)
   const [tourStarted, setTourStarted] = useState(false)
   const [tourDone, setTourDone] = useState(false)
+  const tourJumpRef = useRef<((index: number) => void) | null>(null)
 
   const tourRunning = tourStarted && !tourDone
 
@@ -81,6 +86,14 @@ export default function App() {
     setTourStarted(true)
     setTourDone(false)
     setActiveTab('social')
+  }
+
+  function handleTabChange(tab: TabId) {
+    setActiveTab(tab)
+    if (tourRunning) {
+      const firstIdx = ALL_STEPS.findIndex(s => s.feature === TAB_FEATURE[tab])
+      if (firstIdx >= 0) tourJumpRef.current?.(firstIdx)
+    }
   }
 
   const desc = DESCRIPTIONS[activeTab]
@@ -125,7 +138,7 @@ export default function App() {
           {TABS.map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => handleTabChange(tab.id)}
               className={[
                 'flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all duration-200 border flex-shrink-0',
                 activeTab === tab.id
@@ -169,6 +182,7 @@ export default function App() {
         <OnboardingProvider
           key={tourKey}
           steps={tourStarted ? ALL_STEPS : []}
+          jumpRef={tourJumpRef}
           onComplete={() => setTourDone(true)}
           onStepChange={(step) => setActiveTab(FEATURE_TAB[step.feature])}
         >
@@ -186,7 +200,7 @@ export default function App() {
                     icon: t.icon,
                     label: t.label,
                     active: t.id === activeTab,
-                    onClick: () => setActiveTab(t.id),
+                    onClick: () => handleTabChange(t.id),
                   }))} />
                 }
               >
